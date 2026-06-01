@@ -130,15 +130,15 @@ function Metric({ icon: Icon, label, value, sub, active, tone = "default", onCli
     <button
       onClick={onClick}
       className={cx(
-        "rounded-2xl border px-3 py-3 text-left transition-all duration-200 sm:px-4",
+        "rounded-2xl border px-2.5 py-2.5 text-left transition-all duration-200 sm:px-3 sm:py-3",
         active
           ? "border-cyan-400/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/10"
           : toneClass[tone]
       )}
     >
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-start gap-2">
         <div className={cx(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border sm:h-10 sm:w-10",
+          "hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg border sm:flex sm:h-9 sm:w-9",
           active
             ? "border-cyan-300/40 bg-cyan-500/20 text-cyan-100"
             : tone === "danger"
@@ -147,17 +147,17 @@ function Metric({ icon: Icon, label, value, sub, active, tone = "default", onCli
                 ? "border-amber-300/40 bg-amber-500/15 text-amber-100"
                 : "border-slate-700 bg-slate-900 text-slate-400"
         )}>
-          {Icon && <Icon size={17} />}
+          {Icon && <Icon size={15} />}
         </div>
 
-        <div className="min-w-0 flex-1 overflow-hidden">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-500 sm:text-[10px] sm:tracking-[0.18em]">
             {label}
           </p>
-          <p className="mt-1 truncate text-lg font-extrabold text-white sm:text-xl">
+          <p className="mt-0.5 text-base font-extrabold leading-tight text-white sm:mt-1 sm:text-lg xl:text-xl">
             {value}
           </p>
-          <p className="mt-1 truncate text-[11px] text-slate-500 sm:text-xs">
+          <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-slate-400 sm:text-[11px]">
             {sub}
           </p>
         </div>
@@ -1494,10 +1494,10 @@ function MobileApp({ state, actions, onExitPreview }) {
         {tab === "map" && (
           <div className="flex h-full flex-col gap-3">
             <div className="grid grid-cols-2 gap-2">
-              <Metric icon={AlertOctagon} label="Priority" value={selectedIncident.priority} sub={selectedIncident.status} onClick={() => setToast("Priority card opened.")} />
-              <Metric icon={Crosshair} label="Confidence" value={`${selectedIncident.confidence}%`} sub="human review" onClick={() => setToast("Confidence is AI-derived.")} />
+              <Metric icon={AlertOctagon} label="Priority" value={selectedIncident.priority} sub={`Awaiting · ${selectedIncident.age}`} tone="danger" onClick={() => setToast("Priority card opened.")} />
+              <Metric icon={Crosshair} label="Confidence" value={`${selectedIncident.confidence}%`} sub="AI · verify first" onClick={() => setToast("Confidence is AI-derived.")} />
               <Metric icon={MapPin} label="Distance" value={selectedIncident.distance} sub={selectedIncident.drift} onClick={() => setToast("Position highlighted on map.")} />
-              <Metric icon={Compass} label="Best response" value="Jetski" sub="ETA 03:20" active={routeActive} onClick={startRoute} />
+              <Metric icon={Compass} label={routeActive ? "Route active" : "Best response"} value="Jetski" sub={routeActive ? "En route · 03:20" : "ETA 03:20"} active={routeActive} onClick={startRoute} />
             </div>
             <div className="min-h-[320px] flex-1">
               <MapBoard selectedIncident={selectedIncident} selectedCamera={selectedCamera} routeActive={routeActive} onCameraSelect={selectCamera} />
@@ -1628,15 +1628,15 @@ function DesktopApp({ state, actions, onTogglePreview, previewActive }) {
         />
       </aside>
 
-      <main className="min-h-0 overflow-hidden bg-[#060a10] p-3 xl:p-4">
-        <div className="mb-3 grid grid-cols-5 gap-2 xl:mb-4 xl:gap-3">
-          <Metric icon={AlertOctagon} label="Priority" value={selectedIncident.priority} sub={`Awaiting call · ${selectedIncident.age}`} tone="danger" onClick={() => setToast("Priority card opened · operator should verify before dispatch.")} />
+      <main className="flex min-h-0 flex-col overflow-hidden bg-[#060a10] p-3 xl:p-4">
+        <div className="mb-3 grid grid-cols-3 gap-2 xl:mb-4 xl:grid-cols-5 xl:gap-3">
+          <Metric icon={AlertOctagon} label="Priority" value={selectedIncident.priority} sub={`Awaiting · ${selectedIncident.age}`} tone="danger" onClick={() => setToast("Priority card opened · operator should verify before dispatch.")} />
           <Metric icon={Crosshair} label="Confidence" value={`${selectedIncident.confidence}%`} sub="AI · verify first" onClick={() => setToast("Confidence is AI-derived; human verification remains required.")} />
           <Metric icon={MapPin} label="Distance" value={selectedIncident.distance} sub={selectedIncident.drift} onClick={() => setToast("Swimmer position and drift estimate highlighted on map.")} />
-          <Metric icon={Compass} label={routeActive ? "Route active" : "Best response"} value={routeActive ? "Jetski" : "Jetski"} sub={routeActive ? "En route · 03:20" : "ETA 03:20"} active={routeActive} onClick={startRoute} />
-          <Metric icon={Clock} label="Alert age" value={selectedIncident.age} sub="Auto-flagged · unpatrolled" tone="warning" onClick={() => setToast("Alert age shows how long this incident has been active.")} />
+          <Metric icon={Compass} label={routeActive ? "Route active" : "Best response"} value="Jetski" sub={routeActive ? "En route · 03:20" : "ETA 03:20"} active={routeActive} onClick={startRoute} />
+          <Metric icon={Clock} label="Alert age" value={selectedIncident.age} sub="Auto-flagged · unpatrolled hour" tone="warning" onClick={() => setToast("Alert age shows how long this incident has been active.")} />
         </div>
-        <div className="h-[calc(100%-92px)] xl:h-[calc(100%-100px)]">
+        <div className="min-h-0 flex-1">
           <MapBoard selectedIncident={selectedIncident} selectedCamera={selectedCamera} routeActive={routeActive} onCameraSelect={selectCamera} />
         </div>
       </main>
@@ -1706,9 +1706,12 @@ function PhoneFrame({ children, onClose }) {
         </button>
       </div>
       <div className="relative h-[844px] w-[390px] max-w-[100vw] shrink-0 overflow-hidden rounded-[48px] border-[10px] border-slate-900 bg-black shadow-[0_30px_80px_-20px_rgba(0,200,255,0.25)] sm:max-w-none">
-        <div className="absolute left-1/2 top-2 z-[120] h-6 w-32 -translate-x-1/2 rounded-b-2xl bg-slate-900" />
-        <div className="h-full w-full overflow-hidden rounded-[38px] bg-[#05070b]">
-          {children}
+        <div className="pointer-events-none absolute left-1/2 top-0 z-[120] h-5 w-24 -translate-x-1/2 rounded-b-[14px] bg-slate-900" />
+        <div className="flex h-full w-full flex-col overflow-hidden rounded-[38px] bg-[#05070b]">
+          <div className="h-6 shrink-0 bg-[#090d14]" />
+          <div className="min-h-0 flex-1">
+            {children}
+          </div>
         </div>
       </div>
       <p className="max-w-[420px] text-center text-[11px] text-slate-400">
