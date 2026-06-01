@@ -31,6 +31,8 @@ import {
   Rewind,
   Play,
   Pause,
+  Thermometer,
+  Droplets,
   X,
 } from "lucide-react";
 
@@ -49,16 +51,16 @@ const coastalFeedVideo = "/feeds/coastal-patrol.mp4";
 const distressFeedVideo = "/feeds/bondi-distress.mp4";
 
 const cameras = [
-  { id: "CAM-00", name: "Northern Beaches Watch", site: "Palm Beach", state: "Online", health: 96, x: 83, y: 18, lat: -33.5966, lng: 151.3235, image: manlyPhoto, coverage: "Northern shoreline + surf", detections: 5, confidence: 61, bearing: 95, fov: 80, range: 550 },
-  { id: "CAM-01", name: "North Bondi Tower", site: "Bondi Beach", state: "Online", health: 99, x: 82, y: 33, lat: -33.8889, lng: 151.2812, image: bondiPhoto, feedVideo: coastalFeedVideo, coverage: "North patrol + shoreline", detections: 11, confidence: 72, bearing: 100, fov: 75, range: 520 },
-  { id: "CAM-02", name: "Bondi South Waterline", site: "Bondi Beach", state: "Online", health: 96, x: 86, y: 36, lat: -33.8939, lng: 151.2799, image: coastalPhoto, feedVideo: distressFeedVideo, coverage: "Swim zone + offshore", detections: 23, confidence: 86, bearing: 110, fov: 85, range: 600 },
-  { id: "CAM-03", name: "Coogee Surf Club", site: "Coogee Beach", state: "Online", health: 94, x: 82, y: 41, lat: -33.9207, lng: 151.2555, image: cronullaPhoto, coverage: "Flags + southern water", detections: 14, confidence: 76, bearing: 95, fov: 80, range: 500 },
-  { id: "CAM-04", name: "Maroubra North", site: "Maroubra Beach", state: "Degraded", health: 74, x: 83, y: 46, lat: -33.9449, lng: 151.2602, image: wollongongPhoto, coverage: "Rock shelf + rip channel", detections: 9, confidence: 64, bearing: 105, fov: 70, range: 480 },
-  { id: "CAM-05", name: "Manly Central", site: "Manly Beach", state: "Online", health: 97, x: 84, y: 25, lat: -33.7973, lng: 151.2886, image: manlyPhoto, feedVideo: coastalFeedVideo, coverage: "Surf club + patrol flags", detections: 19, confidence: 81, bearing: 85, fov: 80, range: 540 },
-  { id: "CAM-06", name: "Cronulla South", site: "Cronulla Beach", state: "Online", health: 91, x: 76, y: 57, lat: -34.0547, lng: 151.1545, image: rockPhoto, coverage: "South rocks + waterline", detections: 8, confidence: 74, bearing: 85, fov: 75, range: 500 },
-  { id: "CAM-07", name: "Wollongong North", site: "Wollongong", state: "Online", health: 93, x: 66, y: 72, lat: -34.4234, lng: 150.8931, image: wollongongPhoto, coverage: "North beach + harbour", detections: 12, confidence: 69, bearing: 90, fov: 80, range: 560 },
-  { id: "CAM-08", name: "Kiama Blowhole Watch", site: "Kiama", state: "Online", health: 95, x: 62, y: 84, lat: -34.6710, lng: 150.8543, image: rockPhoto, coverage: "Headland + swimmers", detections: 8, confidence: 65, bearing: 80, fov: 90, range: 480 },
-  { id: "CAM-09", name: "Shellharbour Patrol", site: "Shellharbour", state: "Online", health: 92, x: 64, y: 78, lat: -34.5795, lng: 150.8710, image: coastalPhoto, coverage: "Patrol zone + shore", detections: 6, confidence: 60, bearing: 95, fov: 75, range: 500 },
+  { id: "CAM-00", name: "Northern Beaches Watch", site: "Palm Beach", state: "Online", health: 96, x: 83, y: 18, lat: -33.5966, lng: 151.3235, image: manlyPhoto, coverage: "Northern shoreline + surf", detections: 5, confidence: 61, bearing: 95, fov: 80, range: 550, conditions: { wave: "1.2 m", wind: "10 kt NE", tide: "Rising · mid", water: "21.1 °C", visibility: "9.2 km", risk: "Moderate", note: "Steady NE breeze, low swell." } },
+  { id: "CAM-01", name: "North Bondi Tower", site: "Bondi Beach", state: "Online", health: 99, x: 82, y: 33, lat: -33.8889, lng: 151.2812, image: bondiPhoto, feedVideo: coastalFeedVideo, coverage: "North patrol + shoreline", detections: 11, confidence: 72, bearing: 100, fov: 75, range: 520, conditions: { wave: "1.6 m", wind: "16 kt SE", tide: "Rising · 2/3", water: "19.8 °C", visibility: "8.4 km", risk: "Elevated", note: "Cross-shore wind, choppy shorebreak." } },
+  { id: "CAM-02", name: "Bondi South Waterline", site: "Bondi Beach", state: "Online", health: 96, x: 86, y: 36, lat: -33.8939, lng: 151.2799, image: coastalPhoto, feedVideo: distressFeedVideo, coverage: "Swim zone + offshore", detections: 23, confidence: 86, bearing: 110, fov: 85, range: 600, conditions: { wave: "1.8 m", wind: "18 kt SE", tide: "Rising · high in 47 min", water: "19.4 °C", visibility: "7.8 km", risk: "High", note: "Active rip on south corner. Jetski OK, heli marginal." } },
+  { id: "CAM-03", name: "Coogee Surf Club", site: "Coogee Beach", state: "Online", health: 94, x: 82, y: 41, lat: -33.9207, lng: 151.2555, image: cronullaPhoto, coverage: "Flags + southern water", detections: 14, confidence: 76, bearing: 95, fov: 80, range: 500, conditions: { wave: "1.3 m", wind: "14 kt E", tide: "Rising · mid", water: "20.2 °C", visibility: "9.0 km", risk: "Moderate", note: "Manageable surf inside flags." } },
+  { id: "CAM-04", name: "Maroubra North", site: "Maroubra Beach", state: "Degraded", health: 74, x: 83, y: 46, lat: -33.9449, lng: 151.2602, image: wollongongPhoto, coverage: "Rock shelf + rip channel", detections: 9, confidence: 64, bearing: 105, fov: 70, range: 480, conditions: { wave: "2.1 m", wind: "20 kt SE", tide: "Falling · 1/3", water: "19.6 °C", visibility: "6.9 km", risk: "High", note: "Strong rip near rocks. Avoid heli landing." } },
+  { id: "CAM-05", name: "Manly Central", site: "Manly Beach", state: "Online", health: 97, x: 84, y: 25, lat: -33.7973, lng: 151.2886, image: manlyPhoto, feedVideo: coastalFeedVideo, coverage: "Surf club + patrol flags", detections: 19, confidence: 81, bearing: 85, fov: 80, range: 540, conditions: { wave: "1.1 m", wind: "12 kt NE", tide: "Rising · mid", water: "20.6 °C", visibility: "9.5 km", risk: "Low", note: "Clean small surf, light onshore wind." } },
+  { id: "CAM-06", name: "Cronulla South", site: "Cronulla Beach", state: "Online", health: 91, x: 76, y: 57, lat: -34.0547, lng: 151.1545, image: rockPhoto, coverage: "South rocks + waterline", detections: 8, confidence: 74, bearing: 85, fov: 75, range: 500, conditions: { wave: "1.4 m", wind: "13 kt NE", tide: "Falling · mid", water: "20.4 °C", visibility: "8.7 km", risk: "Moderate", note: "Long-period swell, watch left side." } },
+  { id: "CAM-07", name: "Wollongong North", site: "Wollongong", state: "Online", health: 93, x: 66, y: 72, lat: -34.4234, lng: 150.8931, image: wollongongPhoto, coverage: "North beach + harbour", detections: 12, confidence: 69, bearing: 90, fov: 80, range: 560, conditions: { wave: "1.7 m", wind: "17 kt S", tide: "Rising · 2/3", water: "19.1 °C", visibility: "8.0 km", risk: "Elevated", note: "Southerly building through afternoon." } },
+  { id: "CAM-08", name: "Kiama Blowhole Watch", site: "Kiama", state: "Online", health: 95, x: 62, y: 84, lat: -34.6710, lng: 150.8543, image: rockPhoto, coverage: "Headland + swimmers", detections: 8, confidence: 65, bearing: 80, fov: 90, range: 480, conditions: { wave: "1.9 m", wind: "19 kt S", tide: "Falling · mid", water: "18.9 °C", visibility: "7.6 km", risk: "Elevated", note: "Blowhole swell pulses, keep clear of rocks." } },
+  { id: "CAM-09", name: "Shellharbour Patrol", site: "Shellharbour", state: "Online", health: 92, x: 64, y: 78, lat: -34.5795, lng: 150.8710, image: coastalPhoto, coverage: "Patrol zone + shore", detections: 6, confidence: 60, bearing: 95, fov: 75, range: 500, conditions: { wave: "1.3 m", wind: "12 kt SE", tide: "Rising · low", water: "19.7 °C", visibility: "9.1 km", risk: "Low", note: "Calm patrol zone, good visibility." } },
 ];
 
 const incidents = [
@@ -700,6 +702,41 @@ function MapToolbarButton({ active, onClick, title, label, alert, children }) {
   );
 }
 
+function buildConditionsPopupHtml(cam, opts = {}) {
+  const c = cam.conditions;
+  if (!c) return "";
+  const riskColor = {
+    Low: "background:rgba(16,185,129,0.18);color:#a7f3d0;border-color:rgba(16,185,129,0.4)",
+    Moderate: "background:rgba(245,158,11,0.18);color:#fde68a;border-color:rgba(245,158,11,0.4)",
+    Elevated: "background:rgba(249,115,22,0.18);color:#fed7aa;border-color:rgba(249,115,22,0.4)",
+    High: "background:rgba(239,68,68,0.18);color:#fecaca;border-color:rgba(239,68,68,0.45)",
+    Dangerous: "background:rgba(220,38,38,0.28);color:#fee2e2;border-color:rgba(220,38,38,0.5)",
+  }[c.risk] || "background:rgba(15,23,42,0.6);color:#cbd5e1;border-color:rgba(71,85,105,0.5)";
+
+  const eyebrow = opts.eyebrow || cam.id;
+  const title = opts.title || cam.name;
+
+  return `
+    <div style="font-family:Inter,system-ui,sans-serif;min-width:220px;max-width:260px;padding:10px 12px;background:rgba(7,11,18,0.96);border:1px solid rgba(34,211,238,0.25);border-radius:14px;color:#e2e8f0;box-shadow:0 12px 30px rgba(0,0,0,0.45);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+        <div style="min-width:0;">
+          <div style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#67e8f9;">${eyebrow}</div>
+          <div style="font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</div>
+        </div>
+        <span style="border:1px solid;border-radius:6px;padding:2px 6px;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;${riskColor}">${c.risk}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
+        <div><span style="color:#64748b;">Waves</span> <span style="color:#fff;font-weight:600;">${c.wave}</span></div>
+        <div><span style="color:#64748b;">Wind</span> <span style="color:#fff;font-weight:600;">${c.wind}</span></div>
+        <div><span style="color:#64748b;">Tide</span> <span style="color:#fff;font-weight:600;">${c.tide}</span></div>
+        <div><span style="color:#64748b;">Water</span> <span style="color:#fff;font-weight:600;">${c.water}</span></div>
+        <div style="grid-column:span 2;"><span style="color:#64748b;">Visibility</span> <span style="color:#fff;font-weight:600;">${c.visibility}</span></div>
+      </div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(71,85,105,0.4);font-size:10px;line-height:1.45;color:#94a3b8;">${c.note}</div>
+    </div>
+  `;
+}
+
 function MapBoard({ selectedIncident, selectedCamera, routeActive, onCameraSelect }) {
   const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || "";
   const mapContainerRef = useRef(null);
@@ -707,6 +744,8 @@ function MapBoard({ selectedIncident, selectedCamera, routeActive, onCameraSelec
   const cameraMarkersRef = useRef({});
   const cameraElementsRef = useRef({});
   const incidentMarkerRef = useRef(null);
+  const incidentElementRef = useRef(null);
+  const hoverPopupRef = useRef(null);
   const routeAnimRef = useRef(null);
   const onCameraSelectRef = useRef(onCameraSelect);
 
@@ -825,12 +864,32 @@ function MapBoard({ selectedIncident, selectedCamera, routeActive, onCameraSelec
     if (!mapReady || !mapRef.current) return;
     const map = mapRef.current;
 
+    if (!hoverPopupRef.current) {
+      hoverPopupRef.current = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 18,
+        className: "resq-conditions-popup",
+        maxWidth: "280px",
+      });
+    }
+    const popup = hoverPopupRef.current;
+
     cameras.forEach((cam) => {
       const el = createCameraMarkerElement(cam);
       paintCameraMarker(el, cam, false, false);
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         onCameraSelectRef.current?.(cam.id);
+      });
+      el.addEventListener("mouseenter", () => {
+        popup
+          .setLngLat([cam.lng, cam.lat])
+          .setHTML(buildConditionsPopupHtml(cam))
+          .addTo(map);
+      });
+      el.addEventListener("mouseleave", () => {
+        popup.remove();
       });
       const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
         .setLngLat([cam.lng, cam.lat])
@@ -840,6 +899,7 @@ function MapBoard({ selectedIncident, selectedCamera, routeActive, onCameraSelec
     });
 
     return () => {
+      popup.remove();
       Object.values(cameraMarkersRef.current).forEach((m) => m.remove());
       cameraMarkersRef.current = {};
       cameraElementsRef.current = {};
@@ -880,8 +940,26 @@ function MapBoard({ selectedIncident, selectedCamera, routeActive, onCameraSelec
     const map = mapRef.current;
 
     incidentMarkerRef.current?.remove();
+    const el = buildIncidentMarkerElement(selectedIncident);
+    el.style.pointerEvents = "auto";
+    el.style.cursor = "pointer";
+    const sourceCam = cameras.find((c) => c.id === selectedIncident.cameraId);
+    if (sourceCam && hoverPopupRef.current) {
+      const popup = hoverPopupRef.current;
+      el.addEventListener("mouseenter", () => {
+        popup
+          .setLngLat([selectedIncident.lng, selectedIncident.lat])
+          .setHTML(buildConditionsPopupHtml(sourceCam, {
+            eyebrow: `Incident · ${selectedIncident.id}`,
+            title: selectedIncident.title,
+          }))
+          .addTo(map);
+      });
+      el.addEventListener("mouseleave", () => popup.remove());
+    }
+    incidentElementRef.current = el;
     incidentMarkerRef.current = new mapboxgl.Marker({
-      element: buildIncidentMarkerElement(selectedIncident),
+      element: el,
       anchor: "bottom",
     })
       .setLngLat([selectedIncident.lng, selectedIncident.lat])
@@ -1243,21 +1321,44 @@ function SiteCard({ site, onClick }) {
   );
 }
 
-function IncidentSummary({ incident, camera }) {
+function ConditionMini({ icon: Icon, value }) {
   return (
-    <section className="rounded-3xl border border-red-400/25 bg-red-500/8 p-4">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="mb-2 flex items-center gap-2">
-            <Siren className="text-red-200" size={18} />
-            <Badge value={incident.severity} />
-          </div>
-          <h2 className="text-lg font-semibold text-white">{incident.title}</h2>
-          <p className="mt-1 text-sm text-slate-400">{camera.site} · {camera.name}</p>
-        </div>
-        <span className="rounded-md bg-red-500 px-2 py-1 text-xs font-bold text-white">{incident.priority}</span>
+    <div className="flex shrink-0 items-center gap-1 text-[10px] text-slate-200">
+      <Icon size={11} className="text-cyan-300/80" />
+      <span className="font-medium">{value}</span>
+    </div>
+  );
+}
+
+function IncidentSummary({ incident, camera }) {
+  const c = camera?.conditions;
+  const riskTone = {
+    Low: "border-emerald-400/40 bg-emerald-500/15 text-emerald-100",
+    Moderate: "border-amber-400/40 bg-amber-500/15 text-amber-100",
+    Elevated: "border-orange-400/40 bg-orange-500/15 text-orange-100",
+    High: "border-red-400/40 bg-red-500/15 text-red-100",
+    Dangerous: "border-red-500/60 bg-red-600/25 text-red-50",
+  }[c?.risk] || "border-slate-700 bg-slate-900 text-slate-300";
+
+  return (
+    <section className="rounded-2xl border border-red-400/30 bg-red-500/8 p-3">
+      <div className="flex items-center gap-2">
+        <Siren size={15} className="shrink-0 text-red-200" />
+        <span className="shrink-0 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{incident.priority}</span>
+        <span className="truncate text-sm font-semibold text-white">{incident.title}</span>
       </div>
-      <p className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3 text-sm leading-relaxed text-slate-300">{incident.reason}</p>
+      <p className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-slate-400">
+        <span className="text-slate-300">{camera.site}</span> · {camera.name} · {incident.reason}
+      </p>
+      {c && (
+        <div className="mt-2 flex items-center gap-2 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/70 px-2.5 py-1.5">
+          <span className={cx("shrink-0 rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider", riskTone)}>{c.risk}</span>
+          <ConditionMini icon={Waves} value={c.wave} />
+          <ConditionMini icon={Wind} value={c.wind} />
+          <ConditionMini icon={Droplets} value={c.tide} />
+          <ConditionMini icon={Thermometer} value={c.water} />
+        </div>
+      )}
     </section>
   );
 }
