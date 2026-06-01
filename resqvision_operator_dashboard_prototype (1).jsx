@@ -1476,21 +1476,43 @@ export default function App() {
           <div className="w-full max-w-5xl rounded-[32px] border border-cyan-400/20 bg-[#0b111c] p-5 shadow-2xl sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.3em] text-cyan-200">ResQVision prototype</p>
-                <h1 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-4xl">NSW coastal rescue coordination system</h1>
-                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-300">A map-first operator console for detecting swimmer risk, verifying camera evidence, requesting rescue support and guiding responders to the swimmer location.</p>
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-cyan-200">ResQVision prototype · operator console</p>
+                <h1 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-4xl">NSW coastal rescue coordination</h1>
+                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-300">
+                  This is a live, clickable prototype of the operator screen surf lifesavers see when our AI flags a swimmer in distress. Sites on the left, the live map and CCTV in the middle, and the responder workflow on the right — built around one rule: <span className="text-cyan-200">verify fast, dispatch faster</span>.
+                </p>
               </div>
-              <button onClick={() => setIntro(false)} className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950">Open prototype</button>
+              <button onClick={() => setIntro(false)} className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400">Open prototype</button>
             </div>
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {["Detect incident", "Open camera", "Request support", "Start rescue route"].map((x, i) => (
-                <div key={x} className="rounded-2xl border border-slate-700 bg-slate-950/70 p-5">
+              {[
+                {
+                  title: "Detect the incident",
+                  body: "A red, pulsing pin on the map is an active AI alert. Click it to load the swimmer's location, distance from shore and confidence score.",
+                },
+                {
+                  title: "Verify on camera",
+                  body: "The live feed plays with simulated YOLOv8 boxes, rip-current heatmap and a tracked-swimmer overlay so you can confirm distress in seconds.",
+                },
+                {
+                  title: "Request support",
+                  body: "One tap dispatches the nearest jetski, lifeguard tower or helicopter. Each request streams into the live log on the right.",
+                },
+                {
+                  title: "Guide the rescue",
+                  body: "Start the rescue route to drop a navigation line from the responder to the swimmer — what the jetski crew follows on the water.",
+                },
+              ].map((step, i) => (
+                <div key={step.title} className="rounded-2xl border border-slate-700 bg-slate-950/70 p-5">
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-lg font-bold text-black">{i + 1}</div>
-                  <h3 className="font-semibold text-white">{x}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-400">Click through the dashboard to see this workflow with hardcoded operational data.</p>
+                  <h3 className="font-semibold text-white">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-400">{step.body}</p>
                 </div>
               ))}
             </div>
+            <p className="mt-6 text-xs leading-relaxed text-slate-500">
+              Best viewed on desktop — use the <span className="text-cyan-200">Mobile preview</span> button in the header to see the responder phone layout. All data is simulated for demonstration.
+            </p>
           </div>
         </div>
       )}
