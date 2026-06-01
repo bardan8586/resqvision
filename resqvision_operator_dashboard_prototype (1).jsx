@@ -28,7 +28,9 @@ import {
   Radar,
   Compass,
   AlertOctagon,
-  ShieldCheck,
+  Rewind,
+  Play,
+  Pause,
   X,
 } from "lucide-react";
 
@@ -60,9 +62,9 @@ const cameras = [
 ];
 
 const incidents = [
-  { id: "INC-0142", priority: "P1", title: "Possible swimmer distress", cameraId: "CAM-02", severity: "Critical", status: "Needs verification", confidence: 86, distance: "214 m offshore", drift: "NW · 0.7 m/s", created: "10:42", lat: -33.8953, lng: 151.2858, x: 90, y: 37, reason: "Erratic movement + stationary interval outside patrol boundary", action: "Verify camera, request jetski, start rescue route" },
-  { id: "INC-0139", priority: "P2", title: "Person outside safe zone", cameraId: "CAM-04", severity: "High", status: "Monitoring", confidence: 74, distance: "91 m offshore", drift: "E · 0.3 m/s", created: "10:38", lat: -33.9461, lng: 151.2671, x: 88, y: 48, reason: "Boundary breach near rocks", action: "Monitor and prepare lifeguard confirmation" },
-  { id: "INC-0134", priority: "P3", title: "Crowd density increasing", cameraId: "CAM-01", severity: "Advisory", status: "Logged", confidence: 67, distance: "Near shoreline", drift: "N/A", created: "10:31", lat: -33.8895, lng: 151.2801, x: 84, y: 33, reason: "High crowd count around entry path", action: "No dispatch required" },
+  { id: "INC-0142", priority: "P1", title: "Possible swimmer distress", cameraId: "CAM-02", severity: "Critical", status: "Needs verification", confidence: 86, distance: "214 m offshore", drift: "NW · 0.7 m/s", created: "10:42", age: "00:42", lat: -33.8953, lng: 151.2858, x: 90, y: 37, reason: "Erratic movement + stationary interval outside patrol boundary", action: "Verify camera, request jetski, start rescue route" },
+  { id: "INC-0139", priority: "P2", title: "Person outside safe zone", cameraId: "CAM-04", severity: "High", status: "Monitoring", confidence: 74, distance: "91 m offshore", drift: "E · 0.3 m/s", created: "10:38", age: "04:18", lat: -33.9461, lng: 151.2671, x: 88, y: 48, reason: "Boundary breach near rocks", action: "Monitor and prepare lifeguard confirmation" },
+  { id: "INC-0134", priority: "P3", title: "Crowd density increasing", cameraId: "CAM-01", severity: "Advisory", status: "Logged", confidence: 67, distance: "Near shoreline", drift: "N/A", created: "10:31", age: "11:05", lat: -33.8895, lng: 151.2801, x: 84, y: 33, reason: "High crowd count around entry path", action: "No dispatch required" },
 ];
 
 const sites = [
@@ -78,15 +80,15 @@ const sites = [
 ];
 
 const responderStatus = {
-  jetski: { status: "Ready", fuel: "92%", crew: "2 operators" },
-  helicopter: { status: "Standby", fuel: "74%", crew: "Pilot + medic" },
-  tower: { status: "Visual tracking", fuel: "N/A", crew: "3 lifeguards" },
+  jetski: { status: "Ready to launch", detail: "2 operators · water rescue" },
+  helicopter: { status: "Standby", detail: "Pilot + medic · escalation" },
+  tower: { status: "Visual tracking", detail: "3 lifeguards · shore team" },
 };
 
 const responders = [
-  { id: "J1", name: "Jetski Unit 1", type: "Water rescue", icon: Ship, eta: "03:20", status: "Available" },
-  { id: "L1", name: "Lifeguard Tower", type: "Visual confirmation", icon: LifeBuoy, eta: "01:45", status: "Available" },
-  { id: "H1", name: "Helicopter", type: "Aerial support", icon: Helicopter, eta: "14:00", status: "Escalation only" },
+  { id: "J1", name: "Jetski Unit 1", type: "Water rescue", icon: Ship, eta: "3 min 20 sec", status: "Available" },
+  { id: "L1", name: "Lifeguard Tower", type: "Visual confirmation", icon: LifeBuoy, eta: "1 min 45 sec", status: "Available" },
+  { id: "H1", name: "Helicopter", type: "Aerial support", icon: Helicopter, eta: "14 min", status: "Escalation only" },
 ];
 
 const environment = [
@@ -115,7 +117,13 @@ function Badge({ value }) {
   return <span className={cx("rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-wide", map[value] || "border-slate-700 bg-slate-900 text-slate-300")}>{value}</span>;
 }
 
-function Metric({ icon: Icon, label, value, sub, active, onClick }) {
+function Metric({ icon: Icon, label, value, sub, active, tone = "default", onClick }) {
+  const toneClass = {
+    danger: "border-red-400/40 bg-red-500/10 shadow-red-500/10 hover:border-red-300/60",
+    warning: "border-amber-400/30 bg-amber-500/10 shadow-amber-500/10 hover:border-amber-300/50",
+    default: "border-slate-800 bg-slate-950/70 hover:border-cyan-400/30 hover:bg-slate-900/80",
+  };
+
   return (
     <button
       onClick={onClick}
@@ -123,7 +131,7 @@ function Metric({ icon: Icon, label, value, sub, active, onClick }) {
         "rounded-2xl border px-3 py-3 text-left transition-all duration-200 sm:px-4",
         active
           ? "border-cyan-400/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/10"
-          : "border-slate-800 bg-slate-950/70 hover:border-cyan-400/30 hover:bg-slate-900/80"
+          : toneClass[tone]
       )}
     >
       <div className="flex items-center gap-2 sm:gap-3">
@@ -131,7 +139,11 @@ function Metric({ icon: Icon, label, value, sub, active, onClick }) {
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border sm:h-10 sm:w-10",
           active
             ? "border-cyan-300/40 bg-cyan-500/20 text-cyan-100"
-            : "border-slate-700 bg-slate-900 text-slate-400"
+            : tone === "danger"
+              ? "border-red-300/40 bg-red-500/15 text-red-100"
+              : tone === "warning"
+                ? "border-amber-300/40 bg-amber-500/15 text-amber-100"
+                : "border-slate-700 bg-slate-900 text-slate-400"
         )}>
           {Icon && <Icon size={17} />}
         </div>
@@ -140,7 +152,7 @@ function Metric({ icon: Icon, label, value, sub, active, onClick }) {
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
             {label}
           </p>
-          <p className="mt-1 truncate text-base font-bold text-white sm:text-lg">
+          <p className="mt-1 truncate text-lg font-extrabold text-white sm:text-xl">
             {value}
           </p>
           <p className="mt-1 truncate text-[11px] text-slate-500 sm:text-xs">
@@ -235,7 +247,7 @@ function CVBoundingBox({ box }) {
   );
 }
 
-function CameraFeed({ camera, incident }) {
+function CameraFeed({ camera, incident, onRequestRescue }) {
   const bars = camera.id === "CAM-02" ? [22, 38, 76, 42, 84, 35, 68, 91] : [18, 28, 34, 22, 31, 26, 38, 30];
   const isIncidentSource = incident && camera.id === incident.cameraId;
   const useVideo = Boolean(camera.feedVideo);
@@ -244,12 +256,14 @@ function CameraFeed({ camera, incident }) {
   const heatmap = HEATMAP_BLOBS[camera.id] || [];
 
   const [frame, setFrame] = useState(184523);
+  const [playbackOpen, setPlaybackOpen] = useState(false);
   useEffect(() => {
     const t = setInterval(() => setFrame((f) => f + 1), 1000 / 24);
     return () => clearInterval(t);
   }, []);
 
   return (
+    <>
     <div className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-2xl">
       <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
@@ -257,6 +271,17 @@ function CameraFeed({ camera, incident }) {
           <span className="truncate text-sm font-semibold">{camera.id} · {camera.name}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          {isIncidentSource && useVideo && (
+            <button
+              onClick={() => setPlaybackOpen(true)}
+              className="flex items-center gap-1.5 rounded-md border border-red-400/50 bg-red-500/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-red-100 transition hover:bg-red-500/25"
+              title="Rewind to the moment AI flagged distress"
+            >
+              <Rewind size={12} />
+              <span className="hidden sm:inline">Distress moment</span>
+              <span className="sm:hidden">Replay</span>
+            </button>
+          )}
           {useVideo && (
             <span className="flex items-center gap-1.5 rounded-md border border-red-400/40 bg-red-500/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-red-100">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
@@ -360,9 +385,201 @@ function CameraFeed({ camera, incident }) {
         </div>
       </div>
       <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3"><p className="text-[10px] uppercase tracking-wider text-slate-500">Motion graph</p><div className="mt-3 flex h-14 items-end gap-1">{bars.map((h,i)=><div key={i} className="w-full rounded-t bg-cyan-300/70" style={{height:`${h}%`}} />)}</div></div>
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3"><p className="text-[10px] uppercase tracking-wider text-slate-500">Risk score</p><p className="mt-3 text-2xl font-bold text-red-100">{camera.id === "CAM-02" ? "86" : "42"}</p><p className="text-xs text-slate-500">human review required</p></div>
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3"><p className="text-[10px] uppercase tracking-wider text-slate-500">AI features</p><p className="mt-3 text-xs leading-relaxed text-slate-300">tracking · zone breach · motion anomaly</p></div>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-500">Movement pattern</p>
+          <div className="mt-3 flex h-12 items-end gap-1">
+            {bars.map((h,i)=><div key={i} className={cx("w-full rounded-t", isIncidentSource ? "bg-red-300/80" : "bg-cyan-300/70")} style={{height:`${h}%`}} />)}
+          </div>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-400">{isIncidentSource ? "Erratic movement followed by 38s stationary." : "Normal movement trend for monitored zone."}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-500">Distress risk</p>
+          <p className={cx("mt-3 text-2xl font-bold", isIncidentSource ? "text-red-100" : "text-cyan-100")}>{camera.id === "CAM-02" ? "86%" : "42%"}</p>
+          <p className="text-xs text-slate-500">{isIncidentSource ? "High · operator must verify" : "Moderate · monitor only"}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-500">Why flagged</p>
+          <p className="mt-3 text-xs leading-relaxed text-slate-300">{isIncidentSource ? "Outside patrol boundary · NW drift · low movement." : "Tracking · crowd density · zone monitoring."}</p>
+          {isIncidentSource && useVideo && (
+            <button
+              onClick={() => setPlaybackOpen(true)}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-red-400/40 bg-red-500/15 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-red-100 transition hover:bg-red-500/25"
+            >
+              <Rewind size={12} /> View distress moment
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+    {playbackOpen && isIncidentSource && (
+      <IncidentPlaybackModal
+        camera={camera}
+        incident={incident}
+        detections={detections}
+        heatmap={heatmap}
+        onRequestRescue={onRequestRescue}
+        onClose={() => setPlaybackOpen(false)}
+      />
+    )}
+    </>
+  );
+}
+
+function IncidentPlaybackModal({ camera, incident, detections, heatmap, onRequestRescue, onClose }) {
+  const videoRef = useRef(null);
+  const [playing, setPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const flagAt = 0.55;
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = 0;
+    v.play().catch(() => {});
+    const onTime = () => {
+      if (!v.duration) return;
+      setProgress(v.currentTime / v.duration);
+    };
+    v.addEventListener("timeupdate", onTime);
+    return () => v.removeEventListener("timeupdate", onTime);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); } else { v.pause(); setPlaying(false); }
+  };
+
+  const seek = (ratio) => {
+    const v = videoRef.current;
+    if (!v || !v.duration) return;
+    v.currentTime = Math.max(0, Math.min(v.duration, v.duration * ratio));
+  };
+
+  const jumpToFlag = () => {
+    seek(flagAt);
+    const v = videoRef.current;
+    if (v) { v.play(); setPlaying(true); }
+  };
+
+  const confirmAndDispatch = () => {
+    onRequestRescue?.("Jetski Unit 1");
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/85 p-3 backdrop-blur-sm sm:p-6" onClick={onClose}>
+      <div
+        className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-red-500/30 bg-[#070b12] shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3 sm:px-6">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-red-300">Incident playback · {incident.id}</p>
+            <h3 className="mt-1 truncate text-base font-bold text-white sm:text-lg">{incident.title} · {camera.name}</h3>
+            <p className="mt-0.5 truncate text-xs text-slate-400">AI flagged at 10:42:18 AEST · {incident.distance} · drift {incident.drift}</p>
+          </div>
+          <button onClick={onClose} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-900 text-slate-300 hover:border-red-400/40 hover:text-red-100" title="Close (Esc)">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="relative aspect-video w-full bg-black">
+          <video
+            ref={videoRef}
+            src={camera.feedVideo}
+            poster={camera.image}
+            muted
+            playsInline
+            loop
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/45 via-transparent to-black/85" />
+          <CVHeatmap blobs={heatmap} />
+
+          <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <defs>
+              <pattern id={`playback-grid-${camera.id}`} width="8" height="8" patternUnits="userSpaceOnUse">
+                <path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(103,232,249,0.07)" strokeWidth="0.2" />
+              </pattern>
+            </defs>
+            <rect width="100" height="100" fill={`url(#playback-grid-${camera.id})`} />
+          </svg>
+
+          {detections.map((box) => (
+            <CVBoundingBox key={box.id} box={box} />
+          ))}
+
+          <div className="absolute left-3 top-3 flex items-center gap-2 rounded-xl border border-red-400/30 bg-black/80 px-2.5 py-1.5 text-[10px] text-red-100 backdrop-blur sm:left-5 sm:top-5">
+            <Radar size={12} className="animate-pulse text-red-300" />
+            <span className="font-bold uppercase tracking-wider">Distress moment</span>
+            <span className="rounded bg-red-500/25 px-1.5 py-px font-mono text-[9px] text-red-100">AI {incident.confidence}%</span>
+          </div>
+          <div className="absolute right-3 top-3 rounded-xl border border-slate-700 bg-black/70 px-2.5 py-1.5 text-[10px] text-slate-200 backdrop-blur sm:right-5 sm:top-5">
+            T-04s · stationary 38s · outside patrol boundary
+          </div>
+
+          <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3 sm:bottom-5 sm:left-5 sm:right-5">
+            <button onClick={togglePlay} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/90 text-slate-950 hover:bg-white">
+              {playing ? <Pause size={16} /> : <Play size={16} />}
+            </button>
+            <div
+              className="relative h-2 flex-1 cursor-pointer rounded-full bg-white/15"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                seek((e.clientX - rect.left) / rect.width);
+              }}
+            >
+              <div className="absolute inset-y-0 left-0 rounded-full bg-cyan-400/70" style={{ width: `${progress * 100}%` }} />
+              <div
+                className="absolute -top-1 h-4 w-1 rounded-sm bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.7)]"
+                style={{ left: `calc(${flagAt * 100}% - 1px)` }}
+                title="AI distress detection"
+              />
+            </div>
+            <button
+              onClick={jumpToFlag}
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-red-400/50 bg-red-500/20 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-100 hover:bg-red-500/30"
+            >
+              <Rewind size={12} /> Jump to flag
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 px-4 py-3 sm:grid-cols-4 sm:px-6 sm:py-4">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-slate-500">Confidence at flag</p>
+            <p className="mt-1 text-lg font-bold text-white">{incident.confidence}%</p>
+          </div>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-slate-500">Distance</p>
+            <p className="mt-1 text-lg font-bold text-white">{incident.distance}</p>
+          </div>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-slate-500">Drift</p>
+            <p className="mt-1 text-lg font-bold text-white">{incident.drift}</p>
+          </div>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-slate-500">Why flagged</p>
+            <p className="mt-1 text-xs leading-relaxed text-slate-300">{incident.reason}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-slate-800 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p className="text-[11px] text-slate-500">Esc to close · playback is a simulated rewind on the same camera feed.</p>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-200 hover:border-slate-600">Dismiss</button>
+            <button onClick={confirmAndDispatch} className="flex items-center gap-1.5 rounded-xl bg-red-500 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-red-500/30 hover:bg-red-400">
+              <Siren size={14} /> Confirm distress · request rescue
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1062,7 +1279,7 @@ function ResponderBoard({ onRequestSupport, support }) {
             <button key={r.id} onClick={() => onRequestSupport(r.name)} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3 text-left transition hover:border-cyan-400/40 hover:bg-slate-900">
               <Icon size={18} className="mb-2 text-cyan-200" />
               <p className="text-xs font-bold text-white">{r.name}</p>
-              <p className="mt-1 text-[10px] text-slate-500">ETA {r.eta}</p>
+              <p className="mt-1 text-[10px] text-slate-500">Arrives in {r.eta}</p>
             </button>
           );
         })}
@@ -1072,17 +1289,17 @@ function ResponderBoard({ onRequestSupport, support }) {
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3">
           <div className="mb-2 flex items-center gap-2 text-cyan-100"><Ship size={14} /> Jetski</div>
           <p className="text-slate-300">{responderStatus.jetski.status}</p>
-          <p className="text-slate-500">Fuel {responderStatus.jetski.fuel}</p>
+          <p className="text-slate-500">{responderStatus.jetski.detail}</p>
         </div>
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3">
           <div className="mb-2 flex items-center gap-2 text-amber-100"><Helicopter size={14} /> Air</div>
           <p className="text-slate-300">{responderStatus.helicopter.status}</p>
-          <p className="text-slate-500">Fuel {responderStatus.helicopter.fuel}</p>
+          <p className="text-slate-500">{responderStatus.helicopter.detail}</p>
         </div>
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3">
           <div className="mb-2 flex items-center gap-2 text-emerald-100"><LifeBuoy size={14} /> Tower</div>
           <p className="text-slate-300">{responderStatus.tower.status}</p>
-          <p className="text-slate-500">{responderStatus.tower.crew}</p>
+          <p className="text-slate-500">{responderStatus.tower.detail}</p>
         </div>
       </div>
 
@@ -1219,7 +1436,7 @@ function MobileApp({ state, actions, onExitPreview }) {
         {tab === "alert" && (
           <div className="space-y-4">
             <IncidentSummary incident={selectedIncident} camera={selectedCamera} />
-            <CameraFeed camera={selectedCamera} incident={selectedIncident} />
+            <CameraFeed camera={selectedCamera} incident={selectedIncident} onRequestRescue={requestSupport} />
             <ResponderBoard onRequestSupport={requestSupport} support={support} />
             <ActionsPanel
               routeActive={routeActive}
@@ -1312,11 +1529,11 @@ function DesktopApp({ state, actions, onTogglePreview, previewActive }) {
 
       <main className="min-h-0 overflow-hidden bg-[#060a10] p-3 xl:p-4">
         <div className="mb-3 grid grid-cols-5 gap-2 xl:mb-4 xl:gap-3">
-          <Metric icon={AlertOctagon} label="Priority" value={selectedIncident.priority} sub={selectedIncident.status} onClick={() => setToast("Priority card opened · operator should verify before dispatch.")} />
-          <Metric icon={Crosshair} label="Confidence" value={`${selectedIncident.confidence}%`} sub="human confirmation" onClick={() => setToast("Confidence is AI-derived; human verification remains required.")} />
+          <Metric icon={AlertOctagon} label="Priority" value={selectedIncident.priority} sub={`Awaiting call · ${selectedIncident.age}`} tone="danger" onClick={() => setToast("Priority card opened · operator should verify before dispatch.")} />
+          <Metric icon={Crosshair} label="Confidence" value={`${selectedIncident.confidence}%`} sub="AI · verify first" onClick={() => setToast("Confidence is AI-derived; human verification remains required.")} />
           <Metric icon={MapPin} label="Distance" value={selectedIncident.distance} sub={selectedIncident.drift} onClick={() => setToast("Swimmer position and drift estimate highlighted on map.")} />
-          <Metric icon={Compass} label="Best response" value="Jetski" sub="ETA 03:20" active={routeActive} onClick={startRoute} />
-          <Metric icon={ShieldCheck} label="Region" value="Sydney" sub="Coastal sector" onClick={() => setToast("Sydney coastal sector selected.")} />
+          <Metric icon={Compass} label={routeActive ? "Route active" : "Best response"} value={routeActive ? "Jetski" : "Jetski"} sub={routeActive ? "En route · 03:20" : "ETA 03:20"} active={routeActive} onClick={startRoute} />
+          <Metric icon={Clock} label="Alert age" value={selectedIncident.age} sub="Auto-flagged · unpatrolled" tone="warning" onClick={() => setToast("Alert age shows how long this incident has been active.")} />
         </div>
         <div className="h-[calc(100%-92px)] xl:h-[calc(100%-100px)]">
           <MapBoard selectedIncident={selectedIncident} selectedCamera={selectedCamera} routeActive={routeActive} onCameraSelect={selectCamera} />
@@ -1325,7 +1542,7 @@ function DesktopApp({ state, actions, onTogglePreview, previewActive }) {
 
       <aside className="min-h-0 space-y-3 overflow-y-auto border-l border-slate-800 bg-[#090d14] p-3 xl:space-y-4 xl:p-4">
         <IncidentSummary incident={selectedIncident} camera={selectedCamera} />
-        <CameraFeed camera={selectedCamera} incident={selectedIncident} />
+        <CameraFeed camera={selectedCamera} incident={selectedIncident} onRequestRescue={requestSupport} />
         <ResponderBoard onRequestSupport={requestSupport} support={support} />
         <ActionsPanel
           routeActive={routeActive}
